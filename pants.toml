@@ -1,0 +1,31 @@
+[GLOBAL]
+pants_version = "2.16.0"
+
+backend_packages = [
+  "pants.backend.python",
+  "pants.backend.docker",
+  "pants.backend.experimental.codegen.protobuf.go",
+  "pants.backend.experimental.go",
+  "pants.backend.shell"
+]
+
+[source]
+root_patterns = [
+  "/src/go",
+  "/src/protobuf"
+]
+
+[python]
+interpreter_constraints = ["CPython==3.9.*"]
+enable_resolves = true
+default_resolve = "local"
+
+[cli.alias]
+clean = "fmt lint check update-build-files --changed-since=origin/main --changed-dependees=transitive"
+all-changed = "--changed-since=origin/main --changed-dependees=transitive"
+
+[anonymous-telemetry]
+enabled = false
+
+[docker]
+build_args = ["GIT_COMMIT=local"]
