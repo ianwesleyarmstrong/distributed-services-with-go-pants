@@ -1,0 +1,71 @@
+name: Pants
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+
+jobs:
+  pants:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v3
+      with:
+        fetch-depth: 0
+
+    - uses: actions/setup-python@v3
+      with:
+        python-version: "3.9"
+
+    - name: Initialize Pants
+      uses: pantsbuild/actions/init-pants@v2
+      with:
+        # cache0 makes it easy to bust the cache if needed
+        gha-cache-key: cache0-py
+        named-caches-hash: ${{ hashFiles('lockfiles/*.json') }}
+
+    - name: Check if pants.toml was modified
+      uses: tj-actions/verify-changed-files@v13
+      id: check-pants-toml-modified
+      with:
+        files: |
+          pants.toml
+
+    - name: Set pants scope
+      id: scope
+      run: |
+        if [[ "${{ steps.check-pants-toml-modified.outputs.files_changed }}" == "true" ]]
+        then
+          SCOPE="::"
+        else
+          SCOPE="all-changed"
+        fi
+        echo "scope=${SCOPE}" >> $GITHUB_OUTPUT
+
+    - name: Lint
+      run: |
+        ./pants \
+        tailor --check \
+        update-build-files --check \
+        lint ${{ steps.scope.outputs.scope }}
+
+    - name: Test
+      run: |
+        ./pants all-changed check test        
+
+    - name: Package
+      run: |
+        # We also smoke test that our release process will work by running `package`.
+        GIT_COMMIT=$(git rev-parse HEAD) ./pants all-changed package
+
+    - name: Publish
+      run: |
+        GIT_COMMIT=$(git rev-parse HEAD) ./pants all-changed publish
+
+    - name: Upload pants log
+      if: always()  # We want the log even on failures.
+      uses: actions/upload-artifact@v3
+      with:
+        name: pants-log
+        path: .pants.d/pants.log
