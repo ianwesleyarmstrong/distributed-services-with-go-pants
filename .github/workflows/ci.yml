@@ -25,6 +25,9 @@ jobs:
         gha-cache-key: cache0-py
         named-caches-hash: ${{ hashFiles('lockfiles/*.json') }}
 
+    - name: Bootstrap Pants
+      run: pants --version
+
     - name: Check if pants.toml was modified
       uses: tj-actions/verify-changed-files@v13
       id: check-pants-toml-modified
@@ -45,23 +48,23 @@ jobs:
 
     - name: Lint
       run: |
-        ./pants \
+        pants \
         tailor --check \
         update-build-files --check \
         lint ${{ steps.scope.outputs.scope }}
 
     - name: Test
       run: |
-        ./pants all-changed check test        
+        pants all-changed check test        
 
     - name: Package
       run: |
         # We also smoke test that our release process will work by running `package`.
-        GIT_COMMIT=$(git rev-parse HEAD) ./pants all-changed package
+        GIT_COMMIT=$(git rev-parse HEAD) pants all-changed package
 
     - name: Publish
       run: |
-        GIT_COMMIT=$(git rev-parse HEAD) ./pants all-changed publish
+        GIT_COMMIT=$(git rev-parse HEAD) pants all-changed publish
 
     - name: Upload pants log
       if: always()  # We want the log even on failures.
