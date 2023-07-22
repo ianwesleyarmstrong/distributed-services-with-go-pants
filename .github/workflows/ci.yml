@@ -14,16 +14,33 @@ jobs:
       with:
         fetch-depth: 0
 
-    - uses: actions/setup-python@v3
+    - uses: actions/setup-go@v4
       with:
-        python-version: "3.9"
+        go-version: '1.20'
 
-    - name: Initialize Pants
-      uses: pantsbuild/actions/init-pants@v2
+    - uses: pantsbuild/actions/init-pants@v5-scie-pants
+      # This action bootstraps pants and manages 2-3 GHA caches.
+      # See: github.com/pantsbuild/actions/tree/main/init-pants/
       with:
-        # cache0 makes it easy to bust the cache if needed
-        gha-cache-key: cache0-py
-        named-caches-hash: ${{ hashFiles('lockfiles/*.json') }}
+        # v0 makes it easy to bust the cache if needed
+        # just increase the integer to start with a fresh cache
+        gha-cache-key: v0
+        # The Python backend uses named_caches for Pip/PEX state,
+        # so it is appropriate to invalidate on lockfile changes.
+        named-caches-hash: ${{ hashFiles('python-default.lock') }}
+        # If you're not using a fine-grained remote caching service (see https://www.pantsbuild.org/docs/remote-caching),
+        # then you may also want to preserve the local Pants cache (lmdb_store). However this must invalidate for
+        # changes to any file that can affect the build, so may not be practical in larger repos.
+        # A remote cache service integrates with Pants's fine-grained invalidation and avoids these problems.
+        cache-lmdb-store: 'true'  # defaults to 'false'
+        # Note that named_caches and lmdb_store falls back to partial restore keys which
+        # may give a useful partial result that will save time over completely clean state,
+        # but will cause the cache entry to grow without bound over time.
+        # See https://pants.readme.io/docs/using-pants-in-ci for tips on how to periodically clean it up.
+        # Alternatively you change gha-cache-key to ignore old caches.
+
+    - name: Bootstrap Pants
+      run: pants --version
 
     - name: Check if pants.toml was modified
       uses: tj-actions/verify-changed-files@v13
@@ -45,23 +62,23 @@ jobs:
 
     - name: Lint
       run: |
-        ./pants \
+        pants \
         tailor --check \
         update-build-files --check \
         lint ${{ steps.scope.outputs.scope }}
 
     - name: Test
       run: |
-        ./pants all-changed check test        
+        pants all-changed check test        
 
     - name: Package
       run: |
         # We also smoke test that our release process will work by running `package`.
-        GIT_COMMIT=$(git rev-parse HEAD) ./pants all-changed package
+        GIT_COMMIT=$(git rev-parse HEAD) pants all-changed package
 
     - name: Publish
       run: |
-        GIT_COMMIT=$(git rev-parse HEAD) ./pants all-changed publish
+        GIT_COMMIT=$(git rev-parse HEAD) pants all-changed publish
 
     - name: Upload pants log
       if: always()  # We want the log even on failures.
