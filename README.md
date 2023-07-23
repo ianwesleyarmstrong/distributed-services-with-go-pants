@@ -1,1 +1,1 @@
-# distributed-servies-with-go-pants
+# distributed-services-with-go-pants
