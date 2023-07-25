@@ -4,7 +4,6 @@ pants_version = "2.16.0"
 backend_packages = [
   "pants.backend.docker",
   "pants.backend.experimental.codegen.protobuf.go",
-  "pants.backend.codegen.protobuf.lint.buf",
   "pants.backend.experimental.go",
   "pants.backend.shell"
 ]

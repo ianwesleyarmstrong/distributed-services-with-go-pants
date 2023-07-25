@@ -22,7 +22,7 @@ func TestServer(t *testing.T) {
 	){
 		"produce/consume a message to/from the log succeeds": testProduceConsume,
 		"produce/consume stream succeeds":                    testProduceConsumeStream,
-		"consume past log boundary fails": testConsumePastBoundary,
+		"consume past log boundary fails":                    testConsumePastBoundary,
 	} {
 		t.Run(
 			scenario, func(t *testing.T) {
