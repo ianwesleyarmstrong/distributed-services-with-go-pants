@@ -21,7 +21,7 @@ func (e ErrOffsetOutOfRange) GRPCStatus() *status.Status {
 		e.Offset,
 	)
 	d := &errdetails.LocalizedMessage{
-		Locale: "en-US",
+		Locale:  "en-US",
 		Message: msg,
 	}
 	std, err := st.WithDetails(d)

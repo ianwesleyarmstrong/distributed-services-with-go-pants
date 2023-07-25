@@ -1,3 +1,1 @@
-protobuf_sources(
-    grpc=True
-)
+protobuf_sources(grpc=True)
