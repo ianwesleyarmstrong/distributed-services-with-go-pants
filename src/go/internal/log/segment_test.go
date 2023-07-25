@@ -5,7 +5,7 @@ import (
 	"os"
 	"testing"
 
-	api_gen "github.com/ianwesleyarmstrong/distributed-services-with-go-pants/api_gen/v1/log_v1"
+	api_gen "github.com/ianwesleyarmstrong/distributed-services-with-go-pants/api_gen/v1"
 
 	"github.com/stretchr/testify/require"
 )
