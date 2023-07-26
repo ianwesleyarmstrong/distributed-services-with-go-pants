@@ -1,7 +1,6 @@
 package log
 
 import (
-	"fmt"
 	"io"
 	"io/ioutil"
 	"os"
@@ -11,7 +10,8 @@ import (
 	"strings"
 	"sync"
 
-	api "github.com/ianwesleyarmstrong/distributed-services-with-go-pants/api/log_v1"
+	api "github.com/ianwesleyarmstrong/distributed-services-with-go-pants/api/v1"
+	api_gen "github.com/ianwesleyarmstrong/distributed-services-with-go-pants/api_gen/v1"
 )
 
 type Log struct {
@@ -79,7 +79,7 @@ func (l *Log) setup() error {
 	return nil
 }
 
-func (l *Log) Append(record *api.Record) (uint64, error) {
+func (l *Log) Append(record *api_gen.Record) (uint64, error) {
 	l.mu.Lock()
 	defer l.mu.Unlock()
 	off, err := l.activeSegment.Append(record)
@@ -92,7 +92,7 @@ func (l *Log) Append(record *api.Record) (uint64, error) {
 	return off, err
 }
 
-func (l *Log) Read(off uint64) (*api.Record, error) {
+func (l *Log) Read(off uint64) (*api_gen.Record, error) {
 	l.mu.RLock()
 	defer l.mu.RUnlock()
 
@@ -104,7 +104,7 @@ func (l *Log) Read(off uint64) (*api.Record, error) {
 		}
 	}
 	if s == nil || s.nextOffset <= off {
-		return nil, fmt.Errorf("offset out of range: %d", off)
+		return nil, api.ErrOffsetOutOfRange{Offset: off}
 	}
 	return s.Read(off)
 }

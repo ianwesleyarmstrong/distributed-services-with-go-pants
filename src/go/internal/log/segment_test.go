@@ -5,7 +5,8 @@ import (
 	"os"
 	"testing"
 
-	api "github.com/ianwesleyarmstrong/distributed-services-with-go-pants/api/log_v1"
+	api_gen "github.com/ianwesleyarmstrong/distributed-services-with-go-pants/api_gen/v1"
+
 	"github.com/stretchr/testify/require"
 )
 
@@ -13,7 +14,7 @@ func TestSegment(t *testing.T) {
 	dir, _ := os.MkdirTemp("", "segment-test")
 	defer os.RemoveAll(dir)
 
-	want := &api.Record{Value: []byte("hello world")}
+	want := &api_gen.Record{Value: []byte("hello world")}
 
 	c := Config{}
 	c.Segment.MaxStoreBytes = 1024
