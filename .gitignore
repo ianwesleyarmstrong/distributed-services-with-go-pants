@@ -28,3 +28,6 @@ src/go/api_gen/
 
 # Go workspace file
 go.work
+
+# Certificates
+*.pem
