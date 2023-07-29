@@ -11,11 +11,7 @@ shell_command(
     cfssl gencert \
         -initca ca-csr.json | cfssljson -bare ca
     """,
-    output_files=[
-        "ca.pem",
-        "ca-key.pem",
-        "ca.csr"
-    ]
+    output_files=["ca.pem", "ca-key.pem", "ca.csr"],
 )
 
 shell_command(
@@ -31,11 +27,7 @@ shell_command(
         -profile=server \
         server-csr.json | cfssljson -bare server
     """,
-    output_files=[
-        "server.pem",
-        "server-key.pem",
-        "server.csr"
-    ]
+    output_files=["server.pem", "server-key.pem", "server.csr"],
 )
 
 shell_command(
@@ -52,11 +44,7 @@ shell_command(
         -cn="root" \
         client-csr.json | cfssljson -bare root-client
     """,
-    output_files=[
-        "root-client.pem",
-        "root-client-key.pem",
-        "root-client.csr"
-    ]
+    output_files=["root-client.pem", "root-client-key.pem", "root-client.csr"],
 )
 
 shell_command(
@@ -73,9 +61,5 @@ shell_command(
         -cn="nobody" \
         client-csr.json | cfssljson -bare nobody-client
     """,
-    output_files=[
-        "nobody-client.pem",
-        "nobody-client-key.pem",
-        "nobody-client.csr"
-    ]
+    output_files=["nobody-client.pem", "nobody-client-key.pem", "nobody-client.csr"],
 )
