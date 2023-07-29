@@ -179,18 +179,7 @@ func testUnauthorized(t *testing.T, _, client api_gen.LogClient, config *Config)
 func setupTest(t *testing.T, fn func(*Config)) (rootClient, nobodyClient api_gen.LogClient, cfg *Config, teardown func()) {
 	t.Helper()
 
-	addrs, err := net.InterfaceAddrs()
-	if err != nil {
-		panic(err)
-	}
-	for _, addr := range addrs {
-		ipNet, ok := addr.(*net.IPNet)
-		if ok && ipNet.IP.To4() != nil {
-			fmt.Println("IP:", ipNet.IP)
-		}
-	}
-
-	l, err := net.Listen("tcp", "localhost:0")
+	l, err := net.Listen("tcp", "127.0.0.1:0")
 	require.NoError(t, err)
 	fmt.Println(l.Addr())
 
@@ -243,7 +232,7 @@ func setupTest(t *testing.T, fn func(*Config)) (rootClient, nobodyClient api_gen
 
 	authorizer := auth.New(config.ACLModelFile, config.ACLPolicyFile)
 	cfg = &Config{
-		CommitLog: clog,
+		CommitLog:  clog,
 		Authorizer: authorizer,
 	}
 
