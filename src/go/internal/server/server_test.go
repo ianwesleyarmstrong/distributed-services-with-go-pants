@@ -2,6 +2,7 @@ package server
 
 import (
 	"context"
+	"fmt"
 	"io/ioutil"
 	"net"
 	"testing"
@@ -10,31 +11,38 @@ import (
 
 	api "github.com/ianwesleyarmstrong/distributed-services-with-go-pants/api/v1"
 	api_gen "github.com/ianwesleyarmstrong/distributed-services-with-go-pants/api_gen/v1"
+	"github.com/ianwesleyarmstrong/distributed-services-with-go-pants/internal/auth"
+	"github.com/ianwesleyarmstrong/distributed-services-with-go-pants/internal/config"
 	"github.com/ianwesleyarmstrong/distributed-services-with-go-pants/internal/log"
 	"google.golang.org/grpc"
+	"google.golang.org/grpc/codes"
+	"google.golang.org/grpc/credentials"
+	"google.golang.org/grpc/status"
 )
 
 func TestServer(t *testing.T) {
 	for scenario, fn := range map[string]func(
 		t *testing.T,
-		client api_gen.LogClient,
+		rootClient api_gen.LogClient,
+		nobodyClient api_gen.LogClient,
 		config *Config,
 	){
 		"produce/consume a message to/from the log succeeds": testProduceConsume,
 		"produce/consume stream succeeds":                    testProduceConsumeStream,
 		"consume past log boundary fails":                    testConsumePastBoundary,
+		"unauthorized fails":                                 testUnauthorized,
 	} {
 		t.Run(
 			scenario, func(t *testing.T) {
-				client, config, teardown := setupTest(t, nil)
+				rootClient, nobodyClient, config, teardown := setupTest(t, nil)
 				defer teardown()
-				fn(t, client, config)
+				fn(t, rootClient, nobodyClient, config)
 			},
 		)
 	}
 }
 
-func testProduceConsume(t *testing.T, client api_gen.LogClient, config *Config) {
+func testProduceConsume(t *testing.T, client, _ api_gen.LogClient, config *Config) {
 	ctx := context.Background()
 
 	want := &api_gen.Record{
@@ -60,7 +68,7 @@ func testProduceConsume(t *testing.T, client api_gen.LogClient, config *Config) 
 	require.Equal(t, want.Offset, consume.Record.Offset)
 }
 
-func testProduceConsumeStream(t *testing.T, client api_gen.LogClient, config *Config) {
+func testProduceConsumeStream(t *testing.T, client, _ api_gen.LogClient, config *Config) {
 	ctx := context.Background()
 
 	records := []*api_gen.Record{
@@ -110,7 +118,7 @@ func testProduceConsumeStream(t *testing.T, client api_gen.LogClient, config *Co
 	}
 }
 
-func testConsumePastBoundary(t *testing.T, client api_gen.LogClient, config *Config) {
+func testConsumePastBoundary(t *testing.T, client, _ api_gen.LogClient, config *Config) {
 	ctx := context.Background()
 
 	produce, err := client.Produce(ctx, &api_gen.ProduceRequest{
@@ -136,15 +144,96 @@ func testConsumePastBoundary(t *testing.T, client api_gen.LogClient, config *Con
 	}
 }
 
-func setupTest(t *testing.T, fn func(*Config)) (client api_gen.LogClient, cfg *Config, teardown func()) {
+func testUnauthorized(t *testing.T, _, client api_gen.LogClient, config *Config) {
+	ctx := context.Background()
+	produce, err := client.Produce(ctx,
+		&api_gen.ProduceRequest{
+			Record: &api_gen.Record{
+				Value: []byte("hello world"),
+			},
+		},
+	)
+	require.NoError(t, err)
+
+	if produce != nil {
+		t.Fatalf("produce response should be nil")
+	}
+
+	gotCode, wantCode := status.Code(err), codes.PermissionDenied
+	if gotCode != wantCode {
+		t.Fatalf("got code %d, want: %d", gotCode, wantCode)
+	}
+
+	consume, err := client.Consume(ctx, &api_gen.ConsumeRequest{
+		Offset: 0,
+	})
+	if consume != nil {
+		t.Fatalf("consume response should be nil")
+	}
+	gotCode, wantCode = status.Code(err), codes.PermissionDenied
+	if gotCode != wantCode {
+		t.Fatalf("got code %d, want: %d", gotCode, wantCode)
+	}
+}
+
+func setupTest(t *testing.T, fn func(*Config)) (rootClient, nobodyClient api_gen.LogClient, cfg *Config, teardown func()) {
 	t.Helper()
 
-	l, err := net.Listen("tcp", ":0")
-	require.NoError(t, err)
+	addrs, err := net.InterfaceAddrs()
+	if err != nil {
+		panic(err)
+	}
+	for _, addr := range addrs {
+		ipNet, ok := addr.(*net.IPNet)
+		if ok && ipNet.IP.To4() != nil {
+			fmt.Println("IP:", ipNet.IP)
+		}
+	}
 
-	clientOptions := []grpc.DialOption{grpc.WithInsecure()}
-	cc, err := grpc.Dial(l.Addr().String(), clientOptions...)
+	l, err := net.Listen("tcp", "localhost:0")
 	require.NoError(t, err)
+	fmt.Println(l.Addr())
+
+	newClient := func(crtPath, keyPath string) (*grpc.ClientConn, api_gen.LogClient, []grpc.DialOption) {
+		clientTLSConfig, err := config.SetupTLSConfig(config.TLSConfig{
+			CertFile: crtPath,
+			KeyFile:  keyPath,
+			CAFile:   config.CAFile,
+		})
+
+		require.NoError(t, err)
+		clientCreds := credentials.NewTLS(clientTLSConfig)
+
+		opts := []grpc.DialOption{grpc.WithTransportCredentials(clientCreds)}
+
+		conn, err := grpc.Dial(l.Addr().String(), opts...)
+		require.NoError(t, err)
+		client := api_gen.NewLogClient(conn)
+
+		return conn, client, opts
+	}
+
+	var rootConn *grpc.ClientConn
+	rootConn, rootClient, _ = newClient(
+		config.RootClientCertFile,
+		config.RootClientKeyFile,
+	)
+
+	var nobodyConn *grpc.ClientConn
+	nobodyConn, nobodyClient, _ = newClient(
+		config.NobodyClientCertFile,
+		config.NobodyClientKeyFile,
+	)
+
+	serverTlsConfig, err := config.SetupTLSConfig(config.TLSConfig{
+		CertFile:      config.ServerCertFile,
+		KeyFile:       config.ServerKeyFile,
+		CAFile:        config.CAFile,
+		ServerAddress: l.Addr().String(),
+		Server:        true,
+	})
+	require.NoError(t, err)
+	serverCreds := credentials.NewTLS(serverTlsConfig)
 
 	dir, err := ioutil.TempDir("", "server-test")
 	require.NoError(t, err)
@@ -152,26 +241,27 @@ func setupTest(t *testing.T, fn func(*Config)) (client api_gen.LogClient, cfg *C
 	clog, err := log.NewLog(dir, log.Config{})
 	require.NoError(t, err)
 
+	authorizer := auth.New(config.ACLModelFile, config.ACLPolicyFile)
 	cfg = &Config{
 		CommitLog: clog,
+		Authorizer: authorizer,
 	}
 
 	if fn != nil {
 		fn(cfg)
 	}
 
-	server, err := NewGRPCServer(cfg)
+	server, err := NewGRPCServer(cfg, grpc.Creds(serverCreds))
 	require.NoError(t, err)
 
 	go func() {
 		server.Serve(l)
 	}()
 
-	client = api_gen.NewLogClient(cc)
-
-	return client, cfg, func() {
+	return rootClient, nobodyClient, cfg, func() {
 		server.Stop()
-		cc.Close()
+		nobodyConn.Close()
+		rootConn.Close()
 		l.Close()
 		clog.Remove()
 	}
