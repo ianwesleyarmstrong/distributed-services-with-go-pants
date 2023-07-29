@@ -1,9 +1,4 @@
 go_package(
-    test_extra_env_vars=[
-        f"CONFIG_DIR=/Users/ianarmstrong/Repos/distributed-services-with-go/certs",
-        f"ACL_DIR=/Users/ianarmstrong/Repos/distributed-services-with-go/src/go/tests",
-        "HOME",
-    ],
     dependencies=[":certs", ":auth", ":debug"],
 )
 

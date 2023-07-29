@@ -2,7 +2,6 @@ package server
 
 import (
 	"context"
-	"fmt"
 	"io/ioutil"
 	"net"
 	"testing"
@@ -181,7 +180,6 @@ func setupTest(t *testing.T, fn func(*Config)) (rootClient, nobodyClient api_gen
 
 	l, err := net.Listen("tcp", "127.0.0.1:0")
 	require.NoError(t, err)
-	fmt.Println(l.Addr())
 
 	newClient := func(crtPath, keyPath string) (*grpc.ClientConn, api_gen.LogClient, []grpc.DialOption) {
 		clientTLSConfig, err := config.SetupTLSConfig(config.TLSConfig{

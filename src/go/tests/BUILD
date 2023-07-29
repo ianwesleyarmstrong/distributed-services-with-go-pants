@@ -1,3 +1,3 @@
-resource(name="conf", source="model.conf")
+file(name="conf", source="model.conf")
 
-resource(name="policy", source="policy.csv")
+file(name="policy", source="policy.csv")
