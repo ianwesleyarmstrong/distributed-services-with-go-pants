@@ -1,8 +1,8 @@
 package discovery
 
 import (
-	"net"
 	"go.uber.org/zap"
+	"net"
 
 	"github.com/hashicorp/serf/serf"
 )
@@ -10,15 +10,15 @@ import (
 type Membership struct {
 	Config
 	handler Handler
-	serf *serf.Serf
-	events chan serf.Event
-	logger *zap.Logger
+	serf    *serf.Serf
+	events  chan serf.Event
+	logger  *zap.Logger
 }
 
 type Config struct {
-	NodeName string
-	BindAddr string
-	Tags map[string]string
+	NodeName       string
+	BindAddr       string
+	Tags           map[string]string
 	StartJoinAddrs []string
 }
 
@@ -29,9 +29,9 @@ type Handler interface {
 
 func New(handler Handler, config Config) (*Membership, error) {
 	c := &Membership{
-		Config: config,
+		Config:  config,
 		handler: handler,
-		logger: zap.L().Named("membership"),
+		logger:  zap.L().Named("membership"),
 	}
 	if err := c.setupSerf(); err != nil {
 		return nil, err
@@ -69,7 +69,7 @@ func (m *Membership) setupSerf() (err error) {
 }
 
 func (m *Membership) eventHandler() {
-	for e:= range m.events {
+	for e := range m.events {
 		switch e.EventType() {
 		case serf.EventMemberJoin:
 			for _, member := range e.(serf.MemberEvent).Members {
@@ -117,7 +117,6 @@ func (m *Membership) handleLeave(member serf.Member) {
 	}
 }
 
-
 func (m *Membership) logError(err error, msg string, member serf.Member) {
 	m.logger.Error(
 		msg,
@@ -126,5 +125,3 @@ func (m *Membership) logError(err error, msg string, member serf.Member) {
 		zap.String("rpc_addr", member.Tags["rpc_addr"]),
 	)
 }
-
-

@@ -19,31 +19,31 @@ func TestMembership(t *testing.T) {
 
 	require.Eventually(t, func() bool {
 		return 2 == len(handler.joins) &&
-		3 == len(m[0].Members()) &&
-		0 == len(handler.leaves)
+			3 == len(m[0].Members()) &&
+			0 == len(handler.leaves)
 	}, 3*time.Second, 250*time.Millisecond)
 
 	require.NoError(t, m[2].Leave())
 
 	require.Eventually(t, func() bool {
 		return 2 == len(handler.joins) &&
-		3 == len(m[0].Members()) &&
-		serf.StatusLeft == m[0].Members()[2].Status &&
-		1 == len(handler.leaves)
+			3 == len(m[0].Members()) &&
+			serf.StatusLeft == m[0].Members()[2].Status &&
+			1 == len(handler.leaves)
 	}, 3*time.Second, 250*time.Millisecond)
 
 	require.Equal(t, fmt.Sprintf("%d", 2), <-handler.leaves)
 }
 
 type handler struct {
-	joins chan map[string]string
+	joins  chan map[string]string
 	leaves chan string
 }
 
 func (h *handler) Join(id, addr string) error {
 	if h.joins != nil {
 		h.joins <- map[string]string{
-			"id": id,
+			"id":   id,
 			"addr": addr,
 		}
 	}
@@ -70,7 +70,7 @@ func setupMember(t *testing.T, members []*Membership) (
 	c := Config{
 		NodeName: fmt.Sprintf("%d", id),
 		BindAddr: addr,
-		Tags: tags,
+		Tags:     tags,
 	}
 
 	h := &handler{}
