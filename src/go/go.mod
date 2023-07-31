@@ -10,6 +10,10 @@ require (
 	github.com/stretchr/testify v1.8.4
 	go.opencensus.io v0.22.2
 	go.uber.org/zap v1.10.0
+	github.com/grpc-ecosystem/go-grpc-middleware v1.4.0
+	github.com/stretchr/testify v1.8.4
+	go.opencensus.io v0.22.2
+	go.uber.org/zap v1.18.1
 	google.golang.org/genproto v0.0.0-20230410155749-daa745c078e1
 )
 
@@ -32,6 +36,10 @@ require (
 	go.uber.org/atomic v1.4.0 // indirect
 	go.uber.org/multierr v1.1.0 // indirect
 	golang.org/x/crypto v0.0.0-20200622213623-75b288015ac9 // indirect
+	github.com/golang/groupcache v0.0.0-20190702054246-869f871628b6 // indirect
+	github.com/golang/protobuf v1.5.3 // indirect
+	go.uber.org/atomic v1.7.0 // indirect
+	go.uber.org/multierr v1.6.0 // indirect
 	golang.org/x/net v0.9.0 // indirect
 	golang.org/x/sys v0.7.0 // indirect
 	golang.org/x/text v0.9.0 // indirect

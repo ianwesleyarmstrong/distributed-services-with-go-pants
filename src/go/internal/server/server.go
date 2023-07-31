@@ -91,6 +91,7 @@ func NewGRPCServer(config *Config, opts ...grpc.ServerOption) (*grpc.Server, err
 		),
 		grpc.StatsHandler(&ocgrpc.ServerHandler{}),
 	)
+
 	gsrv := grpc.NewServer(opts...)
 	srv, err := newgrpcServer(config)
 	if err != nil {

@@ -174,7 +174,6 @@ func testUnauthorized(t *testing.T, _, client api_gen.LogClient, config *Config)
 			},
 		},
 	)
-	require.NoError(t, err)
 
 	if produce != nil {
 		t.Fatalf("produce response should be nil")
@@ -208,6 +207,7 @@ func setupTest(t *testing.T, fn func(*Config)) (rootClient, nobodyClient api_gen
 			CertFile: crtPath,
 			KeyFile:  keyPath,
 			CAFile:   config.CAFile,
+			Server:   false,
 		})
 
 		require.NoError(t, err)
@@ -234,7 +234,7 @@ func setupTest(t *testing.T, fn func(*Config)) (rootClient, nobodyClient api_gen
 		config.NobodyClientKeyFile,
 	)
 
-	serverTlsConfig, err := config.SetupTLSConfig(config.TLSConfig{
+	serverTLSConfig, err := config.SetupTLSConfig(config.TLSConfig{
 		CertFile:      config.ServerCertFile,
 		KeyFile:       config.ServerKeyFile,
 		CAFile:        config.CAFile,
@@ -242,7 +242,7 @@ func setupTest(t *testing.T, fn func(*Config)) (rootClient, nobodyClient api_gen
 		Server:        true,
 	})
 	require.NoError(t, err)
-	serverCreds := credentials.NewTLS(serverTlsConfig)
+	serverCreds := credentials.NewTLS(serverTLSConfig)
 
 	dir, err := ioutil.TempDir("", "server-test")
 	require.NoError(t, err)

@@ -6,6 +6,9 @@ on:
       - main
   pull_request:
 
+env:
+  CFSSL_VERSION: v1.6.4
+
 jobs:
   pants:
     runs-on: ubuntu-latest
@@ -16,14 +19,31 @@ jobs:
 
     - uses: actions/setup-go@v4
       with:
-        go-version: '1.20'
+        go-version-file: src/go/go.mod
+        cache-dependency-path: src/go/go.sum
+
+    - name: Restore cfssl from cache
+      id: cfssl-cache-restore
+      uses: actions/cache@v3
+      with:
+        path: |
+          /home/runner/go/bin/cfssl
+          /home/runner/go/bin/cfssljson
+        key: ${{ runner.os }}-cfssl-${{ env.CFSSL_VERSION }}
+
+    - name: Install cfssl
+      if: steps.cfssl-cache-restore.outputs.cache-hit != 'true'
+      run: |
+        go install github.com/cloudflare/cfssl/cmd/cfssl@${{ env.CFSSL_VERSION }}
+        go install github.com/cloudflare/cfssl/cmd/cfssljson@${{ env.CFSSL_VERSION }}
 
     - name: Install cfssl
       run: |
         go install github.com/cloudflare/cfssl/cmd/cfssl@v1.6.4
         go install github.com/cloudflare/cfssl/cmd/cfssljson@v1.6.4
 
-    - uses: pantsbuild/actions/init-pants@v5-scie-pants
+    - name: Install pants
+      uses: pantsbuild/actions/init-pants@v5-scie-pants
       # This action bootstraps pants and manages 2-3 GHA caches.
       # See: github.com/pantsbuild/actions/tree/main/init-pants/
       with:
