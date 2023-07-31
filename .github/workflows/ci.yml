@@ -37,10 +37,6 @@ jobs:
         go install github.com/cloudflare/cfssl/cmd/cfssl@${{ env.CFSSL_VERSION }}
         go install github.com/cloudflare/cfssl/cmd/cfssljson@${{ env.CFSSL_VERSION }}
 
-    - name: Install cfssl
-      run: |
-        go install github.com/cloudflare/cfssl/cmd/cfssl@v1.6.4
-        go install github.com/cloudflare/cfssl/cmd/cfssljson@v1.6.4
 
     - name: Install pants
       uses: pantsbuild/actions/init-pants@v5-scie-pants
