@@ -23,11 +23,7 @@ jobs:
       run: |
         go install github.com/cloudflare/cfssl/cmd/cfssl@v1.6.4
         go install github.com/cloudflare/cfssl/cmd/cfssljson@v1.6.4
-
-    - name: Install cfssl
-      run: |
-        go install github.com/cloudflare/cfssl/cmd/cfssl@v1.6.4
-        go install github.com/cloudflare/cfssl/cmd/cfssljson@v1.6.4
+        which cfssl
 
     - uses: pantsbuild/actions/init-pants@v5-scie-pants
       # This action bootstraps pants and manages 2-3 GHA caches.
