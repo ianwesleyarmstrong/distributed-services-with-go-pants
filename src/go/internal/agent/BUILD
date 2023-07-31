@@ -1,16 +1,4 @@
-go_package(
-    dependencies=[":certs", ":auth", ":debug"], test_extra_env_vars=["DEBUG=true"]
-)
-
-shell_command(
-    name="debug",
-    execution_dependencies=[":certs", ":auth"],
-    tools=["ls", "pwd"],
-    command="""
-    pwd && ls -latr
-    """,
-    log_output=True,
-)
+go_package(dependencies=[":certs", ":auth"], test_extra_env_vars=["DEBUG=true"])
 
 relocated_files(
     name="certs",
