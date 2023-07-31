@@ -1,7 +1,7 @@
 go_package(
     dependencies=[":certs", ":auth"],
-    test_race=True,
-    test_extra_env_vars=["DEBUG=true"],
+    test_extra_env_vars=["DEBUG"],
+    test_timeout=30,
 )
 
 relocated_files(
@@ -13,12 +13,12 @@ relocated_files(
         "certs:gen-cert-server",
     ],
     src="certs",
-    dest="src/go/internal/server",
+    dest="src/go/internal/agent",
 )
 
 relocated_files(
     name="auth",
     files_targets=["src/go/tests:conf", "src/go/tests:policy"],
     src="src/go/tests",
-    dest="src/go/internal/server",
+    dest="src/go/internal/agent",
 )
