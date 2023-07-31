@@ -263,8 +263,8 @@ func setupTest(t *testing.T, fn func(*Config)) (rootClient, nobodyClient api_gen
 		t.Logf("traces log file: %s", traceslogFile.Name())
 
 		telemetryExporter, err = exporter.NewLogExporter(exporter.Options{
-			MetricsLogFile: metricsLogFile.Name(),
-			TracesLogFile: traceslogFile.Name(),
+			MetricsLogFile:    metricsLogFile.Name(),
+			TracesLogFile:     traceslogFile.Name(),
 			ReportingInterval: time.Second,
 		})
 
