@@ -1,4 +1,8 @@
-go_package(dependencies=[":certs", ":auth", ":debug"], test_race=True)
+go_package(
+    dependencies=[":certs", ":auth", ":debug"],
+    test_race=True,
+    test_extra_env_vars=["DEBUG=true"],
+)
 
 shell_command(
     name="debug",

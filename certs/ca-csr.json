@@ -1,5 +1,5 @@
 {
-    "CN": "My Awesome CA",
+    "CN": "My Custom CA",
     "key": {
         "algo": "rsa",
         "size": 2048
