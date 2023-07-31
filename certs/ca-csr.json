@@ -1,16 +1,16 @@
 {
-    "CN": "My Custom CA",
+    "CN": "My Awesome CA",
     "key": {
         "algo": "rsa",
         "size": 2048
     },
     "names": [
         {
-            "C": "US",
-            "L": "NYC",
-            "ST": "New York",
-            "O": "ianwesleyarmstrong",
-            "OU": "CA services"
+            "C": "CA",
+            "L": "ON",
+            "ST": "Toronto",
+            "O": "My Awesome Company",
+            "OU": "CA Services"
         }
     ]
 }

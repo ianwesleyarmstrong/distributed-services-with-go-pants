@@ -1,5 +1,6 @@
 go_package(
     dependencies=[":certs", ":auth", ":debug"],
+    test_race=True
 )
 
 shell_command(
