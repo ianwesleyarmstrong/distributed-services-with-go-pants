@@ -22,7 +22,7 @@ jobs:
         go-version-file: src/go/go.mod
         cache-dependency-path: src/go/go.sum
 
-    - name: restore cfssl from cache
+    - name: Restore cfssl from cache
       id: cfssl-cache-restore
       uses: actions/cache@v3
       with:
