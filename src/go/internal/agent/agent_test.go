@@ -53,7 +53,7 @@ func TestAgent(t *testing.T) {
 			startJoinAddrs = append(startJoinAddrs, agents[0].Config.BindAddr)
 		}
 
-		agent, err := agent.New(agent.Config{
+		a, err := agent.New(agent.Config{
 			NodeName:        fmt.Sprintf("%d", i),
 			StartJoinAddrs:  startJoinAddrs,
 			BindAddr:        bindAddr,
@@ -66,15 +66,15 @@ func TestAgent(t *testing.T) {
 		})
 		require.NoError(t, err)
 
-		agents = append(agents, agent)
+		agents = append(agents, a)
 	}
 
 	defer func() {
-		for _, agent := range agents {
-			err := agent.Shutdown()
+		for _, a := range agents {
+			err := a.Shutdown()
 			require.NoError(t, err)
 			require.NoError(t,
-				os.RemoveAll(agent.Config.DataDir),
+				os.RemoveAll(a.Config.DataDir),
 			)
 		}
 	}()
