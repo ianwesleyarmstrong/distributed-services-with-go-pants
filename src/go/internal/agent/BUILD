@@ -1,6 +1,6 @@
 go_package(
     dependencies=[":certs", ":auth"],
-    test_extra_env_vars=["DEBUG=true"],
+    test_extra_env_vars=["DEBUG"],
     test_timeout=30,
 )
 
