@@ -60,9 +60,6 @@ jobs:
         # See https://pants.readme.io/docs/using-pants-in-ci for tips on how to periodically clean it up.
         # Alternatively you change gha-cache-key to ignore old caches.
 
-    - name: Bootstrap Pants
-      run: pants --version
-
     - name: Check if pants.toml was modified
       uses: tj-actions/verify-changed-files@v13
       id: check-pants-toml-modified
