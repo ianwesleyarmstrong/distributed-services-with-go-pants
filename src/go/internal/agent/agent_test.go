@@ -14,6 +14,7 @@ import (
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials"
 
+	api "github.com/ianwesleyarmstrong/distributed-services-with-go-pants/api/v1"
 	api_gen "github.com/ianwesleyarmstrong/distributed-services-with-go-pants/api_gen/v1"
 	"github.com/ianwesleyarmstrong/distributed-services-with-go-pants/internal/agent"
 	"github.com/ianwesleyarmstrong/distributed-services-with-go-pants/internal/config"
@@ -62,6 +63,7 @@ func TestAgent(t *testing.T) {
 			ACLPolicyFile:   config.ACLPolicyFile,
 			ServerTLSConfig: serverTLSConfig,
 			PeerTLSConfig:   peerTLSConfig,
+			Boostrap: i == 0,
 		})
 		require.NoError(t, err)
 
@@ -110,6 +112,18 @@ func TestAgent(t *testing.T) {
 	)
 	require.NoError(t, err)
 	require.Equal(t, consumeResponse.Record.Value, testMsg)
+
+	consumeResponse, err = leaderClient.Consume(
+		context.Background(),
+		&api_gen.ConsumeRequest{
+			Offset: produceResponse.Offset + 1,
+		},
+	)
+	require.Nil(t, consumeResponse)
+	require.Error(t, err)
+	got := grpc.Code(err)
+	want := grpc.Code(api.ErrOffsetOutOfRange{}.GRPCStatus().Err())
+	require.Equal(t, got, want)
 }
 
 func client(t *testing.T, agent *agent.Agent, tlsConfig *tls.Config) api_gen.LogClient {
