@@ -32,6 +32,7 @@ func (r *Resolver) Build(
 	opts resolver.BuildOptions,
 ) (resolver.Resolver, error) {
 	r.logger = zap.L().Named("resolver")
+	r.clientConn = cc
 	var dialOpts []grpc.DialOption
 	if opts.DialCreds != nil {
 		dialOpts = append(
@@ -39,17 +40,14 @@ func (r *Resolver) Build(
 			grpc.WithTransportCredentials(opts.DialCreds),
 		)
 	}
-
 	r.serviceConfig = r.clientConn.ParseServiceConfig(
 		fmt.Sprintf(`{"loadBalancingConfig":[{"%s":{}}]}`, Name),
 	)
-
 	var err error
 	r.resolverConn, err = grpc.Dial(target.Endpoint(), dialOpts...)
 	if err != nil {
 		return nil, err
 	}
-
 	r.ResolveNow(resolver.ResolveNowOptions{})
 	return r, nil
 }
@@ -86,8 +84,7 @@ func (r *Resolver) ResolveNow(resolver.ResolveNowOptions) {
 				"is_leader",
 				server.IsLeader,
 			),
-		},
-		)
+		})
 	}
 	r.clientConn.UpdateState(resolver.State{
 		Addresses:     addrs,
