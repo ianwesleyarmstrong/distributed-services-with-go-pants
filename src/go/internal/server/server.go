@@ -39,9 +39,14 @@ type Authorizer interface {
 	Authorize(subject, object, action string) error
 }
 
+type GetServerer interface {
+	GetServers() ([]*api_gen.Server, error)
+}
+
 type Config struct {
-	CommitLog  CommitLog
-	Authorizer Authorizer
+	CommitLog   CommitLog
+	Authorizer  Authorizer
+	GetServerer GetServerer
 }
 
 type grpcServer struct {
@@ -200,4 +205,12 @@ func (s *grpcServer) ConsumeStream(req *api_gen.ConsumeRequest, stream api_gen.L
 			req.Offset++
 		}
 	}
+}
+
+func (s *grpcServer) getServers(ctx context.Context, req *api_gen.GetServersRequest) (*api_gen.GetServersResponse, error) {
+	servers, err := s.GetServerer.GetServers()
+	if err != nil {
+		return nil, err
+	}
+	return &api_gen.GetServersResponse{Servers: servers}, nil
 }
