@@ -218,7 +218,7 @@ func (a *Agent) Shutdown() error {
 }
 
 func (a *Agent) serve() error {
-	if err := a.serve(); err != nil {
+	if err := a.mux.Serve(); err != nil {
 		_ = a.Shutdown()
 		return err
 	}

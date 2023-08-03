@@ -4,7 +4,6 @@ import (
 	"context"
 	"crypto/tls"
 	"fmt"
-	"io/ioutil"
 	"os"
 	"testing"
 	"time"
@@ -45,7 +44,7 @@ func TestAgent(t *testing.T) {
 		bindAddr := fmt.Sprintf("%s:%d", "127.0.0.1", ports[0])
 		rpcPort := ports[1]
 
-		dataDir, err := ioutil.TempDir("", "agent-test-log")
+		dataDir, err := os.MkdirTemp("", "agent-test-log")
 		require.NoError(t, err)
 
 		var startJoinAddrs []string
@@ -55,6 +54,7 @@ func TestAgent(t *testing.T) {
 
 		a, err := agent.New(agent.Config{
 			NodeName:        fmt.Sprintf("%d", i),
+			Boostrap: i == 0,
 			StartJoinAddrs:  startJoinAddrs,
 			BindAddr:        bindAddr,
 			RPCPort:         rpcPort,
@@ -63,7 +63,6 @@ func TestAgent(t *testing.T) {
 			ACLPolicyFile:   config.ACLPolicyFile,
 			ServerTLSConfig: serverTLSConfig,
 			PeerTLSConfig:   peerTLSConfig,
-			Boostrap: i == 0,
 		})
 		require.NoError(t, err)
 
