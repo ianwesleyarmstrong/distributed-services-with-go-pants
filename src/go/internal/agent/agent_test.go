@@ -11,8 +11,8 @@ import (
 	"github.com/stretchr/testify/require"
 	"github.com/travisjeffery/go-dynaport"
 	"google.golang.org/grpc"
-	"google.golang.org/grpc/status"
 	"google.golang.org/grpc/credentials"
+	"google.golang.org/grpc/status"
 
 	api "github.com/ianwesleyarmstrong/distributed-services-with-go-pants/api/v1"
 	api_gen "github.com/ianwesleyarmstrong/distributed-services-with-go-pants/api_gen/v1"
