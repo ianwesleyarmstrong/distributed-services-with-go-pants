@@ -1,7 +1,7 @@
 go_package(
     dependencies=[":certs", ":auth"],
     test_extra_env_vars=["DEBUG"],
-    test_timeout=30,
+    test_timeout=20,
 )
 
 relocated_files(
