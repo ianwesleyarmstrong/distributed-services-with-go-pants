@@ -27,10 +27,10 @@ var (
 
 func TestMain(m *testing.M) {
 	logger, err := zap.NewDevelopment()
-		if err != nil {
-			panic(err)
-		}
-		zap.ReplaceGlobals(logger)
+	if err != nil {
+		panic(err)
+	}
+	zap.ReplaceGlobals(logger)
 	os.Exit(m.Run())
 }
 
