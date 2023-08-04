@@ -5,5 +5,3 @@ docker_environment(
     platform="linux_x86_64",
     image="ubuntu:22.04",
 )
-
-docker_environment(name="linux_go", platform="linux_x86_64", image="ubuntu:22.04")
