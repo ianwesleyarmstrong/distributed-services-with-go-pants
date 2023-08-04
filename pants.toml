@@ -6,6 +6,7 @@ backend_packages = [
   "pants.backend.experimental.adhoc",
   "pants.backend.experimental.codegen.protobuf.go",
   "pants.backend.experimental.go",
+  "pants.backend.experimental.helm",
   "pants.backend.shell"
 ]
 
@@ -29,3 +30,18 @@ enabled = false
 
 [docker]
 build_args = ["GIT_COMMIT=local"]
+env_vars = [
+    "DOCKER_CONFIG=/pants/.docker",
+    "DOCKER_CONTEXT=default",
+    "DOCKER_HOST=/var/run/docker.sock"
+]
+tools = [
+    "dirname",
+    "readlink",
+    "sw_vers"
+]
+
+[environments-preview.names]
+osx = "//:local_osx"
+linux_docker = "//:linux_docker"
+linux_go = "//:linux_go"
