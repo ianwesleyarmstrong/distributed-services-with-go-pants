@@ -1,4 +1,8 @@
-local_environment(name="local_osx", compatible_platforms=["macos_arm64"])
+local_environment(
+    name="local_osx",
+    compatible_platforms=["macos_arm64"],
+    fallback_environment="linux_docker"
+)
 
 docker_environment(
     name="linux_docker",
