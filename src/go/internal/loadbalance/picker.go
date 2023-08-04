@@ -29,21 +29,20 @@ func (p *Picker) Build(buildInfo base.PickerBuildInfo) balancer.Picker {
 
 		if isLeader {
 			p.leader = sc
+			continue
 		}
 		followers = append(followers, sc)
 	}
+	p.followers = followers
 	return p
 }
 
-func (p *Picker) Pick(info balancer.PickInfo) (
-	balancer.PickResult, error,
-) {
-	p.mu.Lock()
-	defer p.mu.Unlock()
-
+func (p *Picker) Pick(info balancer.PickInfo) (balancer.PickResult, error) {
+	p.mu.RLock()
+	defer p.mu.RUnlock()
 	var result balancer.PickResult
-
-	if strings.Contains(info.FullMethodName, "Produce") || len(p.followers) == 0 {
+	if strings.Contains(info.FullMethodName, "Produce") ||
+		len(p.followers) == 0 {
 		result.SubConn = p.leader
 	} else if strings.Contains(info.FullMethodName, "Consume") {
 		result.SubConn = p.nextFollower()
@@ -51,7 +50,6 @@ func (p *Picker) Pick(info balancer.PickInfo) (
 	if result.SubConn == nil {
 		return result, balancer.ErrNoSubConnAvailable
 	}
-
 	return result, nil
 }
 
@@ -60,4 +58,10 @@ func (p *Picker) nextFollower() balancer.SubConn {
 	len := uint64(len(p.followers))
 	idx := int(cur % len)
 	return p.followers[idx]
+}
+
+func init() {
+	balancer.Register(
+		base.NewBalancerBuilder(Name, &Picker{}, base.Config{}),
+	)
 }
