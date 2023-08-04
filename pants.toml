@@ -35,5 +35,6 @@ env_vars = [
 ]
 
 [environments-preview.names]
-osx = "//:local_osx"
+# osx = "//:local_osx"
+osx_go = "//:local_osx_go"
 linux_docker = "//:linux_docker"

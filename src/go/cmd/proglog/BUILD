@@ -1,6 +1,6 @@
 go_binary(
     name="bin",
-    environment="osx"
+    environment="osx_go"
     # environment=parametrize("osx", "linux_docker")
 )
 

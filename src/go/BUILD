@@ -7,9 +7,4 @@ go_mod()
 #     ]
 # )
 
-docker_image(
-    name="docker-osx",
-    extra_build_args=[
-        "ENVIRONMENT=@environment=osx"
-    ]
-)
+docker_image(name="docker-osx", extra_build_args=["ENVIRONMENT=@environment=osx"])
