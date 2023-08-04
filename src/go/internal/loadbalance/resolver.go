@@ -30,7 +30,6 @@ func (r *Resolver) Build(
 	opts resolver.BuildOptions,
 ) (resolver.Resolver, error) {
 	r.logger = zap.L().Named("resolver")
-	fmt.Println("Starting Resolver Build")
 	r.clientConn = cc
 	var dialOpts []grpc.DialOption
 	if opts.DialCreds != nil {
@@ -48,7 +47,6 @@ func (r *Resolver) Build(
 		return nil, err
 	}
 	r.ResolveNow(resolver.ResolveNowOptions{})
-	fmt.Println("Finished Building Resolver")
 	return r, nil
 }
 
