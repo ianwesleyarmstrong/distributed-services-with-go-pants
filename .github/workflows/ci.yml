@@ -78,6 +78,12 @@ jobs:
         fi
         echo "scope=${SCOPE}" >> $GITHUB_OUTPUT
 
+    - name: Pants lint
+      run: |
+        pants ${{ steps.scope.outputs.scope }} tailor --check \
+        update-build-files --check \
+        lint
+
     - name: Upload pants log
       if: always()  # We want the log even on failures.
       uses: actions/upload-artifact@v3
