@@ -207,7 +207,7 @@ func (s *grpcServer) ConsumeStream(req *api_gen.ConsumeRequest, stream api_gen.L
 	}
 }
 
-func (s *grpcServer) getServers(ctx context.Context, req *api_gen.GetServersRequest) (*api_gen.GetServersResponse, error) {
+func (s *grpcServer) GetServers(ctx context.Context, req *api_gen.GetServersRequest) (*api_gen.GetServersResponse, error) {
 	servers, err := s.GetServerer.GetServers()
 	if err != nil {
 		return nil, err

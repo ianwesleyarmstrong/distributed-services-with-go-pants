@@ -1,11 +1,14 @@
 package loadbalance_test
 
 import (
+	"flag"
 	"net"
 	"net/url"
+	"os"
 	"testing"
 
 	"github.com/stretchr/testify/require"
+	"go.uber.org/zap"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/attributes"
 	"google.golang.org/grpc/credentials"
@@ -17,6 +20,19 @@ import (
 	"github.com/ianwesleyarmstrong/distributed-services-with-go-pants/internal/loadbalance"
 	"github.com/ianwesleyarmstrong/distributed-services-with-go-pants/internal/server"
 )
+
+var (
+	debug = flag.Bool("debug", false, "enable observability for debugging.")
+)
+
+func TestMain(m *testing.M) {
+	logger, err := zap.NewDevelopment()
+		if err != nil {
+			panic(err)
+		}
+		zap.ReplaceGlobals(logger)
+	os.Exit(m.Run())
+}
 
 func TestResolver(t *testing.T) {
 	l, err := net.Listen("tcp", "127.0.0.1:0")
@@ -39,7 +55,7 @@ func TestResolver(t *testing.T) {
 
 	go srv.Serve(l)
 
-	conn := &clientConn{}
+	conn := &mockClientConn{}
 	tlsConfig, err = config.SetupTLSConfig(config.TLSConfig{
 		CertFile:      config.RootClientCertFile,
 		KeyFile:       config.RootClientKeyFile,
@@ -49,7 +65,6 @@ func TestResolver(t *testing.T) {
 	})
 	require.NoError(t, err)
 	clientCreds := credentials.NewTLS(tlsConfig)
-
 	opts := resolver.BuildOptions{
 		DialCreds: clientCreds,
 	}
@@ -64,16 +79,13 @@ func TestResolver(t *testing.T) {
 	require.NoError(t, err)
 
 	wantState := resolver.State{
-		Addresses: []resolver.Address{
-			{
-				Addr:       "localhost:9001",
-				Attributes: attributes.New("is_leader", true),
-			},
-			{
-				Addr:       "localhost:9002",
-				Attributes: attributes.New("is_leader", false),
-			},
-		},
+		Addresses: []resolver.Address{{
+			Addr:       "localhost:9001",
+			Attributes: attributes.New("is_leader", true),
+		}, {
+			Addr:       "localhost:9002",
+			Attributes: attributes.New("is_leader", false),
+		}},
 	}
 	require.Equal(t, wantState, conn.state)
 
@@ -85,35 +97,34 @@ func TestResolver(t *testing.T) {
 type getServers struct{}
 
 func (s *getServers) GetServers() ([]*api_gen.Server, error) {
-	return []*api_gen.Server{
-		{
-			Id:       "leader",
-			RpcAddr:  "localhost:9001",
-			IsLeader: true,
-		},
-		{
-			Id:      "follower",
-			RpcAddr: "localhost:9002",
-		},
-	}, nil
+	return []*api_gen.Server{{
+		Id:       "leader",
+		RpcAddr:  "localhost:9001",
+		IsLeader: true,
+	}, {
+		Id:      "follower",
+		RpcAddr: "localhost:9002",
+	}}, nil
 }
 
-type clientConn struct {
+type mockClientConn struct {
 	resolver.ClientConn
 	state resolver.State
 }
 
-func (c *clientConn) UpdateState(state resolver.State) error {
+func (c *mockClientConn) UpdateState(state resolver.State) error {
 	c.state = state
 	return nil
 }
 
-func (c *clientConn) ReportError(err error) {}
+func (c *mockClientConn) ReportError(err error) {}
 
-func (c *clientConn) NewAddress(addrs []resolver.Address) {}
+func (c *mockClientConn) NewAddress(addrs []resolver.Address) {}
 
-func (c *clientConn) NewServiceConfig(config string) {}
+func (c *mockClientConn) NewServiceConfig(config string) {}
 
-func (c *clientConn) ParseServiceConfig(config string) *serviceconfig.ParseResult {
+func (c *mockClientConn) ParseServiceConfig(
+	config string,
+) *serviceconfig.ParseResult {
 	return nil
 }

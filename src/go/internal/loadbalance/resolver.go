@@ -14,8 +14,6 @@ import (
 	api_gen "github.com/ianwesleyarmstrong/distributed-services-with-go-pants/api_gen/v1"
 )
 
-const Name = "proglog"
-
 type Resolver struct {
 	mu            sync.Mutex
 	clientConn    resolver.ClientConn
@@ -32,6 +30,7 @@ func (r *Resolver) Build(
 	opts resolver.BuildOptions,
 ) (resolver.Resolver, error) {
 	r.logger = zap.L().Named("resolver")
+	fmt.Println("Starting Resolver Build")
 	r.clientConn = cc
 	var dialOpts []grpc.DialOption
 	if opts.DialCreds != nil {
@@ -49,8 +48,11 @@ func (r *Resolver) Build(
 		return nil, err
 	}
 	r.ResolveNow(resolver.ResolveNowOptions{})
+	fmt.Println("Finished Building Resolver")
 	return r, nil
 }
+
+const Name = "proglog"
 
 func (r *Resolver) Scheme() string {
 	return Name
@@ -66,7 +68,7 @@ func (r *Resolver) ResolveNow(resolver.ResolveNowOptions) {
 	r.mu.Lock()
 	defer r.mu.Unlock()
 	client := api_gen.NewLogClient(r.resolverConn)
-
+	// get cluster and then set on cc attributes
 	ctx := context.Background()
 	res, err := client.GetServers(ctx, &api_gen.GetServersRequest{})
 	if err != nil {
@@ -86,6 +88,7 @@ func (r *Resolver) ResolveNow(resolver.ResolveNowOptions) {
 			),
 		})
 	}
+
 	r.clientConn.UpdateState(resolver.State{
 		Addresses:     addrs,
 		ServiceConfig: r.serviceConfig,
@@ -95,7 +98,7 @@ func (r *Resolver) ResolveNow(resolver.ResolveNowOptions) {
 func (r *Resolver) Close() {
 	if err := r.resolverConn.Close(); err != nil {
 		r.logger.Error(
-			"failed to clsoe conn",
+			"failed to close conn",
 			zap.Error(err),
 		)
 	}
