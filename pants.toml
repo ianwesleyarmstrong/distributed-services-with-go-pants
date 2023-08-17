@@ -1,5 +1,5 @@
 [GLOBAL]
-pants_version = "2.16.0"
+pants_version = "2.17.0rc3"
 
 backend_packages = [
   "pants.backend.docker",
@@ -32,10 +32,24 @@ enabled = false
 build_args = ["GIT_COMMIT=local"]
 env_vars = [
     "DOCKER_CONTEXT=default",
+    "DOCKER_HOST=/var/run/docker.sock",
+    "USER=%(user)s",
+    "HOME=%(homedir)s",
+    "PATH"
+]
+tools = [
+  "sw_vers"
 ]
 
 [environments-preview.names]
-# osx = "//:local_osx"
-osx_go = "//:local_osx_go"
-linux_go = "//:linux_go"
+osx = "//:local_osx"
 linux_docker = "//:linux_docker"
+linux_go = "//:linux_go"
+
+[subprocess-environment]
+env_vars = [
+    "DOCKER_CONTEXT=default",
+    "DOCKER_HOST=/var/run/docker.sock",
+    "USER=%(user)s",
+    "HOME=%(homedir)s",
+]

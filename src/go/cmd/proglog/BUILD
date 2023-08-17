@@ -1,7 +1,19 @@
+# go_binary(
+#     name="bin",
+#     cgo_enabled=False,
+#     environment=parametrize("osx", "linux_go")
+# )
+
 go_binary(
-    name="bin",
-    environment="osx_go"
-    # environment=parametrize("osx", "linux_docker")
+    name="bin-osx",
+    cgo_enabled=False,
+    environment="osx"
+)
+
+go_binary(
+    name="bin-linux",
+    cgo_enabled=False,
+    environment="linux_go"
 )
 
 go_package()

@@ -1,10 +1,7 @@
-go_mod()
+go_mod(
+    linker_flags=["-linkmode=external"]
+)
 
-# docker_image(
-#     name="docker-linux",
-#     extra_build_args=[
-#         "ENVIRONMENT=@environment=linux_docker"
-#     ]
-# )
-
-docker_image(name="docker-osx", extra_build_args=["ENVIRONMENT=@environment=osx"])
+docker_image(
+    name="proglog_docker"
+)
