@@ -22,6 +22,10 @@ jobs:
         go-version-file: src/go/go.mod
         cache-dependency-path: src/go/go.sum
 
+    - uses: actions/setup-python@v4
+      with:
+        python-version: '3.9' 
+
     - name: Restore cfssl from cache
       id: cfssl-cache-restore
       uses: actions/cache@v3
@@ -103,6 +107,10 @@ jobs:
         go-version-file: src/go/go.mod
         cache-dependency-path: src/go/go.sum
 
+    - uses: actions/setup-python@v4
+      with:
+        python-version: '3.9' 
+
     - name: Restore cfssl from cache
       id: cfssl-cache-restore
       uses: actions/cache@v3
@@ -163,6 +171,10 @@ jobs:
       with:
         go-version-file: src/go/go.mod
         cache-dependency-path: src/go/go.sum
+
+    - uses: actions/setup-python@v4
+      with:
+        python-version: '3.9' 
 
     - name: Restore cfssl from cache
       id: cfssl-cache-restore
